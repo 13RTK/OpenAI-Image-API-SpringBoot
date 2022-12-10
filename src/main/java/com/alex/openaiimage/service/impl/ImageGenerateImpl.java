@@ -63,8 +63,12 @@ public class ImageGenerateImpl implements ImageGenerate {
 
     private IFlyResponse getFlyResponse(String prompt) throws Exception {
         String iFlyTekUrl = environment.getProperty("iflytek.url");
-        String bodyStr = IFlyRequestBuilder.buildHttpBody(prompt);
-        Map<String, String> iFlyHeaderMap = IFlyRequestBuilder.buildHttpHeader(bodyStr);
+        String appId = environment.getProperty("iflytek.appId");
+        String secret = environment.getProperty("iflytek.secret");
+        String key = environment.getProperty("iflytek.key");
+
+        String bodyStr = IFlyRequestBuilder.buildHttpBody(prompt, appId);
+        Map<String, String> iFlyHeaderMap = IFlyRequestBuilder.buildHttpHeader(bodyStr, iFlyTekUrl, secret, key);
 
         Map<String, Object> resultMap = HttpUtil.doPost(iFlyTekUrl, iFlyHeaderMap, bodyStr, "iFly");
 
@@ -76,7 +80,7 @@ public class ImageGenerateImpl implements ImageGenerate {
         return gson.fromJson(dstBodyStr, IFlyResponse.class);
     }
 
-    private ImageResponse getImageResponse(String prompt, int number, String size) throws Exception {
+    private ImageResponse getImageResponse(String prompt, int number, String size) {
         String openAIUrl = environment.getProperty("openAI.url");
         String accessKey = environment.getProperty("openAI.key");
         Map<String, String> headerMap = OpenAIRequestBuilder.buildHttpHeader(accessKey);

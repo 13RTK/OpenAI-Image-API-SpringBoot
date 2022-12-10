@@ -1,8 +1,6 @@
 package com.alex.openaiimage.util;
 
-import com.alex.openaiimage.entity.YamlConfiguration;
 import com.google.gson.JsonObject;
-import org.yaml.snakeyaml.Yaml;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -19,40 +17,21 @@ import java.util.*;
 public class IFlyRequestBuilder {
     private IFlyRequestBuilder() {
     }
-
-    private static String WebOTS_URL;
-    // 应用ID（到控制台获取）
-    private static String APPID;
-    // 接口APISecret（到控制台机器翻译服务页面获取）
-    private static String API_SECRET;
-    // 接口APIKey（到控制台机器翻译服务页面获取）
-    private static String API_KEY;
-
     // 翻译语种
     private static final String FROM = "cn";
     // 目标语种
     private static final String TO = "en";
 
-    static {
-        Yaml yaml = new Yaml();
-        YamlConfiguration yamlConfiguration = yaml.loadAs(ClassLoader.getSystemResourceAsStream("application.yaml"), YamlConfiguration.class);
-
-        WebOTS_URL = yamlConfiguration.getIflytek().getUrl();
-        APPID = yamlConfiguration.getIflytek().getAppId();
-        API_SECRET = yamlConfiguration.getIflytek().getSecret();
-        API_KEY = yamlConfiguration.getIflytek().getKey();
-    }
-
     /**
      * 组装http请求体
      */
-    public static String buildHttpBody(String text) {
+    public static String buildHttpBody(String text, String appId) {
         JsonObject body = new JsonObject();
         JsonObject business = new JsonObject();
         JsonObject common = new JsonObject();
         JsonObject data = new JsonObject();
         //填充common
-        common.addProperty("app_id", APPID);
+        common.addProperty("app_id", appId);
         //填充business
         business.addProperty("from", FROM);
         business.addProperty("to", TO);
@@ -70,9 +49,9 @@ public class IFlyRequestBuilder {
     /**
      * 组装http请求头
      */
-    public static Map<String, String> buildHttpHeader(String body) throws MalformedURLException, NoSuchAlgorithmException, InvalidKeyException {
+    public static Map<String, String> buildHttpHeader(String body, String urlStr, String secret, String key) throws MalformedURLException, NoSuchAlgorithmException, InvalidKeyException {
         Map<String, String> header = new HashMap<>();
-        URL url = new URL(WebOTS_URL);
+        URL url = new URL(urlStr);
 
         //时间戳
         SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
@@ -91,10 +70,10 @@ public class IFlyRequestBuilder {
                 "POST " + url.getPath() + " HTTP/1.1" + "\n" +
                 //
                 "digest: " + digestBase64;
-        String sha = hmacsign(builder, API_SECRET);
+        String sha = hmacsign(builder, secret);
 
         //组装authorization
-        String authorization = String.format("api_key=\"%s\", algorithm=\"%s\", headers=\"%s\", signature=\"%s\"", API_KEY, "hmac-sha256", "host date request-line digest", sha);
+        String authorization = String.format("api_key=\"%s\", algorithm=\"%s\", headers=\"%s\", signature=\"%s\"", key, "hmac-sha256", "host date request-line digest", sha);
 
         header.put("Authorization", authorization);
         header.put("Content-Type", "application/json");
