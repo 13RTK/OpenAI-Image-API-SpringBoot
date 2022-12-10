@@ -1,11 +1,11 @@
 package com.alex.openaiimage.util;
 
+import com.alex.openaiimage.entity.YamlConfiguration;
 import com.google.gson.JsonObject;
+import org.yaml.snakeyaml.Yaml;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -17,6 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class IFlyRequestBuilder {
+    private IFlyRequestBuilder() {
+    }
+
     private static String WebOTS_URL;
     // 应用ID（到控制台获取）
     private static String APPID;
@@ -31,17 +34,13 @@ public class IFlyRequestBuilder {
     private static final String TO = "en";
 
     static {
-        try {
-            Properties properties = new Properties();
-            properties.load(new FileInputStream("/Users/alex/Desktop/ots_java_demo/demo/src/main/resources/application.properties"));
+        Yaml yaml = new Yaml();
+        YamlConfiguration yamlConfiguration = yaml.loadAs(ClassLoader.getSystemResourceAsStream("application.yaml"), YamlConfiguration.class);
 
-            WebOTS_URL = properties.getProperty("flytek.url");
-            APPID = properties.getProperty("flytek.appId");
-            API_SECRET = properties.getProperty("flytek.secret");
-            API_KEY = properties.getProperty("flytek.key");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        WebOTS_URL = yamlConfiguration.getIflytek().getUrl();
+        APPID = yamlConfiguration.getIflytek().getAppId();
+        API_SECRET = yamlConfiguration.getIflytek().getSecret();
+        API_KEY = yamlConfiguration.getIflytek().getKey();
     }
 
     /**

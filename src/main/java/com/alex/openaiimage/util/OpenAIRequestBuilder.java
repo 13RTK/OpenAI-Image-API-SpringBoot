@@ -8,6 +8,9 @@ import java.util.Map;
 
 @Log
 public class OpenAIRequestBuilder {
+    private OpenAIRequestBuilder() {
+    }
+
     public static String buildBody(String prompt, int number, String size) {
         JsonObject body = new JsonObject();
 

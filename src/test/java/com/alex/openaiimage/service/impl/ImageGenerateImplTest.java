@@ -44,4 +44,13 @@ class ImageGenerateImplTest {
 
         Assertions.assertTrue(imageUrl.size() > 0);
     }
+
+//    @Test
+//    void yamlParseTest() throws FileNotFoundException {
+//        Yaml yaml = new Yaml();
+//        InputStream resourceAsStream = ClassLoader.getSystemResourceAsStream("application.yaml");
+//        System.out.println(resourceAsStream);
+//
+//        YamlConfiguration yamlConfiguration = yaml.loadAs(resourceAsStream, YamlConfiguration.class);
+//    }
 }
