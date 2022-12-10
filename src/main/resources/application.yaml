@@ -1,0 +1,9 @@
+openAI:
+  key: Bearer <API-KEY>
+  url: https://api.openai.com/v1/images/generations
+
+iflytek:
+  url: https://ntrans.xfyun.cn/v2/ots
+  appId: <APP-ID>
+  secret: <YOUR-SECRET>
+  key: <API-KEY>
