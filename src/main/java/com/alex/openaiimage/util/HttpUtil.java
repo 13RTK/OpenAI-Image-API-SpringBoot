@@ -3,15 +3,14 @@ package com.alex.openaiimage.util;
 import lombok.extern.java.Log;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -29,9 +28,9 @@ public class HttpUtil {
      * @param body   接收buildHttpBody方法中返回的body字符串
      * @return 将API请求结果（Content-Type和body）作为Map返回
      */
-    public static Map<String, Object> doPost(String url, Map<String, String> header, String body) {
+    public static Map<String, Object> doPost(String url, Map<String, String> header, String body, String apiType) {
         Map<String, Object> resultMap = new HashMap<>();
-        PrintWriter out = null;
+        PrintWriter out;
         try {
             // 设置 url，并获取连接实例
             URL realUrl = new URL(url);
@@ -54,8 +53,8 @@ public class HttpUtil {
             // 如果请求失败，则返回错误信息
             if (HttpURLConnection.HTTP_OK != httpURLConnection.getResponseCode()) {
                 BufferedReader br = new BufferedReader(new InputStreamReader(httpURLConnection.getErrorStream()));
-                System.out.println("Http 请求失败，状态码：" + httpURLConnection.getResponseCode() + "，错误信息：" + br.readLine());
-                return null;
+                log.info("Http 请求失败，状态码：" + httpURLConnection.getResponseCode() + "，错误信息：" + br.readLine());
+                return Collections.emptyMap();
             }
 
             // 设置请求 body
@@ -66,23 +65,19 @@ public class HttpUtil {
                 result.append(line);
             }
             resultMap.put("Content-Type", "text/plain");
-            resultMap.put("body", result.toString());
+
+            if (apiType.equals("iFly")) {
+                resultMap.put("body", result.toString());
+                log.info("响应内容为: " + resultMap.get("body"));
+            } else {
+                resultMap.put("data", result.toString());
+                log.info("响应内容为: " + resultMap.get("data"));
+            }
 
 
-            log.info("响应内容为: " + resultMap.get("body"));
             return resultMap;
         } catch (Exception e) {
-            return null;
+            return Collections.emptyMap();
         }
-    }
-
-    static byte[] getBytes(InputStream in) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024 * 4];
-        int n;
-        while ((n = in.read(buffer)) != -1) {
-            out.write(buffer, 0, n);
-        }
-        return out.toByteArray();
     }
 }

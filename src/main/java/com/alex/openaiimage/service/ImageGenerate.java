@@ -3,7 +3,6 @@ package com.alex.openaiimage.service;
 import com.alex.openaiimage.entity.ImageSize;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service

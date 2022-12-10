@@ -3,12 +3,16 @@ package com.alex.openaiimage.service.impl;
 import com.alex.openaiimage.entity.ImageSize;
 import com.alex.openaiimage.service.ImageGenerate;
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
 @SpringBootTest
+/*
+  测试图片获取的实现类
+ */
 class ImageGenerateImplTest {
     @Resource
     ImageGenerate imageGenerate;
@@ -23,6 +27,8 @@ class ImageGenerateImplTest {
         List<String> imageUrl = imageGenerate.getImageUrl(prompt, num, imageSize, srcLanguage);
         System.out.println("中文测试输出如下：");
         imageUrl.forEach(System.out::println);
+
+        Assertions.assertTrue(imageUrl.size() > 0);
     }
 
     @Test
@@ -35,5 +41,7 @@ class ImageGenerateImplTest {
         List<String> imageUrl = imageGenerate.getImageUrl(prompt, num, imageSize, srcLanguage);
         System.out.println("英文测试输出如下：");
         imageUrl.forEach(System.out::println);
+
+        Assertions.assertTrue(imageUrl.size() > 0);
     }
 }

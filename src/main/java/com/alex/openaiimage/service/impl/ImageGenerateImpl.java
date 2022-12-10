@@ -24,39 +24,24 @@ public class ImageGenerateImpl implements ImageGenerate {
     @Resource
     Environment environment;
 
+    private String prompt;
+
     @Override
     public List<String> getImageUrl(String prompt, int number, ImageSize imageSize, String srcLanguage) throws Exception {
+        this.prompt = prompt;
         List<String> resList = new ArrayList<>(number);
         String size = imageSize.getSizeNum();
-        String accessKey = environment.getProperty("openAI.key");
-        String openAIImageUrl = environment.getProperty("openAI.url");
 
         // 输入内容为中文
         if (srcLanguage.equals("zh")) {
-            String iFlyTekUrl = environment.getProperty("iflytek.url");
+            IFlyResponse iFlyResponse = getFlyResponse(prompt);
 
-            String bodyStr = IFlyRequestBuilder.buildHttpBody(prompt);
-            Map<String, String> iFlyHeader = IFlyRequestBuilder.buildHttpHeader(bodyStr);
-
-            Map<String, Object> resultMap = HttpUtil.doPost(iFlyTekUrl, iFlyHeader, bodyStr);
-            if (resultMap == null) {
-                log.info("请求失败，doPost方法未能成功获取响应");
-                throw new Exception("IFlyTek翻译接口请求失败");
-            }
-
-            String dstBodyStr = resultMap.get("body").toString();
-
-            Gson gson = new Gson();
-            IFlyResponse iFlyResponse = gson.fromJson(dstBodyStr, IFlyResponse.class);
             if (iFlyResponse.getCode() != 0) {
                 log.warning("请前往https://www.xfyun.cn/document/error-code?code=" + iFlyResponse.getCode() + "查询解决办法");
             }
-
-            prompt = getDstResult(gson.fromJson(dstBodyStr, JsonElement.class));
         }
 
-
-        ImageResponse imageResponse = OpenAIRequestBuilder.buildHTTPBody(accessKey, openAIImageUrl, prompt, number, size);
+        ImageResponse imageResponse = getImageResponse(this.prompt, number, size);
         if (imageResponse == null) {
             throw new NullPointerException("Image response from \"buildeHttpBody\" method is null");
         }
@@ -74,5 +59,32 @@ public class ImageGenerateImpl implements ImageGenerate {
                 .getAsJsonObject().get("result")
                 .getAsJsonObject().get("trans_result")
                 .getAsJsonObject().get("dst").getAsString();
+    }
+
+    private IFlyResponse getFlyResponse(String prompt) throws Exception {
+        String iFlyTekUrl = environment.getProperty("iflytek.url");
+        String bodyStr = IFlyRequestBuilder.buildHttpBody(prompt);
+        Map<String, String> iFlyHeaderMap = IFlyRequestBuilder.buildHttpHeader(bodyStr);
+
+        Map<String, Object> resultMap = HttpUtil.doPost(iFlyTekUrl, iFlyHeaderMap, bodyStr, "iFly");
+
+        String dstBodyStr = resultMap.get("body").toString();
+        Gson gson = new Gson();
+
+        this.prompt = getDstResult(gson.fromJson(dstBodyStr, JsonElement.class));
+
+        return gson.fromJson(dstBodyStr, IFlyResponse.class);
+    }
+
+    private ImageResponse getImageResponse(String prompt, int number, String size) throws Exception {
+        String openAIUrl = environment.getProperty("openAI.url");
+        String accessKey = environment.getProperty("openAI.key");
+        Map<String, String> headerMap = OpenAIRequestBuilder.buildHttpHeader(accessKey);
+        String bodyStr = OpenAIRequestBuilder.buildBody(prompt, number, size);
+
+        Map<String, Object> resultMap = HttpUtil.doPost(openAIUrl, headerMap, bodyStr, "OpenAI");
+
+        String data = (String) resultMap.get("data");
+        return new Gson().fromJson(data, ImageResponse.class);
     }
 }
