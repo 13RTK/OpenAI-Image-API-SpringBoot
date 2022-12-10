@@ -1,12 +1,11 @@
 package com.alex.openaiimage.service.impl;
 
-import com.alex.openaiimage.service.ImageGenerate;
 import com.alex.openaiimage.entity.ImageSize;
+import com.alex.openaiimage.service.ImageGenerate;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.IOException;
 import java.util.List;
 
 @SpringBootTest
@@ -15,12 +14,26 @@ class ImageGenerateImplTest {
     ImageGenerate imageGenerate;
 
     @Test
-    void getImageUrlTest() throws IOException {
-        String prompt = "A beautiful young lady with long hair looks like a k-pop star";
+    void getImageUrlTestZh() throws Exception {
+        String prompt = "一个长得像kpop明星的长头发韩国年轻女性，且她的脸比较小";
         int num = 2;
         ImageSize imageSize = ImageSize.SMALL;
+        String srcLanguage = "zh";
 
-        List<String> imageUrl = imageGenerate.getImageUrl(prompt, num, imageSize);
+        List<String> imageUrl = imageGenerate.getImageUrl(prompt, num, imageSize, srcLanguage);
+        System.out.println("中文测试输出如下：");
+        imageUrl.forEach(System.out::println);
+    }
+
+    @Test
+    void getImageUrlTestEn() throws Exception {
+        String prompt = "A beautiful korean young lady with long hair looks like a k-pop star, she has thin face.";
+        int num = 1;
+        ImageSize imageSize = ImageSize.SMALL;
+        String srcLanguage = "en";
+
+        List<String> imageUrl = imageGenerate.getImageUrl(prompt, num, imageSize, srcLanguage);
+        System.out.println("英文测试输出如下：");
         imageUrl.forEach(System.out::println);
     }
 }
